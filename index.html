@@ -1,218 +1,253 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="hy">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AgroSmart — Խելացի ջերմոցների ներդրումային հարթակ</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroSmart — Խելացի ջերմոցներ</title>
 
-  <style>
-    * { box-sizing: border-box; }
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #f4f7f6;
-      color: #1e2b28;
-      line-height: 1.6;
-    }
+<style>
+* { box-sizing: border-box; }
 
-    header {
-      background: #ffffff;
-      padding: 18px 50px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4f7f6;
+  color: #1e2b28;
+}
 
-    .logo {
-      font-size: 22px;
-      font-weight: 700;
-      color: #1f7a5b;
-    }
+header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 16px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  z-index: 100;
+}
 
-    nav a {
-      margin-left: 22px;
-      text-decoration: none;
-      color: #1e2b28;
-      font-weight: 500;
-    }
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f7a5b;
+  cursor: pointer;
+}
 
-    .btn {
-      background: #1f7a5b;
-      color: #fff !important;
-      padding: 10px 18px;
-      border-radius: 6px;
-    }
+nav a, nav button {
+  margin-left: 14px;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  color: #1e2b28;
+}
 
-    .hero {
-      padding: 90px 40px;
-      text-align: center;
-      background: linear-gradient(135deg, #1f7a5b, #3fa37f);
-      color: #fff;
-    }
+.primary {
+  background: #1f7a5b;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
 
-    .hero h1 {
-      font-size: 44px;
-      margin-bottom: 18px;
-    }
+.hero {
+  padding: 90px 20px;
+  text-align: center;
+  background: linear-gradient(135deg,#1f7a5b,#3fa37f);
+  color: white;
+}
 
-    .hero p {
-      font-size: 18px;
-      max-width: 760px;
-      margin: auto;
-    }
+section {
+  padding: 70px 30px;
+  max-width: 1200px;
+  margin: auto;
+}
 
-    section {
-      padding: 70px 40px;
-      max-width: 1200px;
-      margin: auto;
-    }
+h2 {
+  color: #1f7a5b;
+  margin-bottom: 30px;
+}
 
-    h2 {
-      margin-bottom: 30px;
-      font-size: 32px;
-      color: #1f7a5b;
-    }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+  gap: 24px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 26px;
-    }
+.card {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.05);
+}
 
-    .card {
-      background: #fff;
-      padding: 28px;
-      border-radius: 12px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.05);
-    }
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
 
-    .card h3 {
-      margin-top: 0;
-      color: #1f7a5b;
-    }
+.map {
+  height: 200px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
 
-    footer {
-      background: #182422;
-      color: #fff;
-      text-align: center;
-      padding: 40px;
-      margin-top: 80px;
-    }
-  </style>
+.tech li {
+  margin-bottom: 12px;
+}
+
+footer {
+  background: #182422;
+  color: white;
+  text-align: center;
+  padding: 40px;
+  margin-top: 80px;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  max-width: 320px;
+  margin: 100px auto;
+  border-radius: 10px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+</style>
 </head>
 
-<body>
+<body id="home">
 
 <header>
-  <div class="logo">AgroSmart</div>
+  <div class="logo" onclick="goHome()">AgroSmart</div>
   <nav>
-    <a href="#home">Գլխավոր</a>
     <a href="#projects">Ծրագրեր</a>
-    <a href="#how">Ինչպես է աշխատում</a>
+    <a href="#tech">Տեխնոլոգիա</a>
     <a href="#about">Մեր մասին</a>
-    <a href="#news">Նորություններ</a>
     <a href="#contact">Կապ</a>
-    <a href="#" class="btn">Ներդրիր հիմա</a>
-    <a href="#">Մուտք</a>
-    <a href="#">Գրանցում</a>
+    <button onclick="openModal('login')">Մուտք</button>
+    <button class="primary" onclick="openModal('register')">Գրանցում</button>
   </nav>
 </header>
 
-<section class="hero" id="home">
-  <h1>Ներդրումներ խելացի ջերմոցների մեջ</h1>
+<div class="hero">
+  <h1>Խելացի ջերմոցներ՝ վերահսկվող արտադրությամբ</h1>
   <p>
-    AgroSmart-ը ներդրումային հարթակ է, որը միավորում է
-    նորարարական տեխնոլոգիաները և գյուղատնտեսությունը՝
-    ապահովելով կայուն և վերահսկելի եկամուտ։
+    Ներդրումային հարթակ, որտեղ գյուղատնտեսությունը միավորվում է
+    սենսորների, ավտոմատացման և մաքուր օդի տեխնոլոգիաների հետ։
   </p>
-</section>
+</div>
 
 <section id="projects">
-  <h2>Խելացի ջերմոցային ծրագրեր</h2>
+<h2>Տարածաշրջաններ</h2>
 
-  <div class="grid">
-    <div class="card">
-      <h3>Զովունի – Քանաքեռավան</h3>
-      <p>📍 Կոտայքի մարզ</p>
-      <p>🌱 Լոլիկ և կանաչին</p>
-      <p>🤖 Ավտոմատ կլիմայի վերահսկում</p>
-      <p>📈 Մոտավոր եկամուտ՝ 20–24%</p>
-      <a href="#" class="btn">Մանրամասներ</a>
-    </div>
+<div class="cards">
 
-    <div class="card">
-      <h3>Պտղնի</h3>
-      <p>📍 Կոտայքի մարզ</p>
-      <p>🌱 Վարունգ և սեզոնային մշակաբույսեր</p>
-      <p>🤖 Խելացի ոռոգում և սենսորներ</p>
-      <p>📈 Մոտավոր եկամուտ՝ 18–22%</p>
-      <a href="#" class="btn">Մանրամասներ</a>
-    </div>
+<div class="card">
+<img src="https://images.unsplash.com/photo-1582515073490-dc0c9a1f5d89">
+<h3>Զովունի – Քանաքեռավան</h3>
+<p>Լոլիկ, կանաչին • ավտոմատ կլիմա</p>
+<div id="map1" class="map"></div>
+</div>
 
-    <div class="card">
-      <h3>Նաիրիի տարածաշրջան</h3>
-      <p>📍 Արագածոտնի մարզ</p>
-      <p>🌱 Հատապտուղներ</p>
-      <p>🤖 Տվյալների վրա հիմնված կառավարում</p>
-      <p>📈 Մոտավոր եկամուտ՝ 22–26%</p>
-      <a href="#" class="btn">Մանրամասներ</a>
-    </div>
-  </div>
+<div class="card">
+<img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae">
+<h3>Պտղնի</h3>
+<p>Վարունգ • խելացի ոռոգում</p>
+<div id="map2" class="map"></div>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1598514982611-0c6d5b72a8a4">
+<h3>Նաիրիի տարածաշրջան</h3>
+<p>Հատապտուղներ • CO₂ վերահսկում</p>
+<div id="map3" class="map"></div>
+</div>
+
+</div>
 </section>
 
-<section id="how">
-  <h2>Ինչպես է աշխատում</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>1. Ընտրում եք ծրագիրը</h3>
-      <p>Ընտրեք տարածաշրջանը և ջերմոցային նախագիծը։</p>
-    </div>
-    <div class="card">
-      <h3>2. Ներդրում</h3>
-      <p>Կատարում եք ներդրում առցանց հարթակի միջոցով։</p>
-    </div>
-    <div class="card">
-      <h3>3. Վերահսկում</h3>
-      <p>Հետևում եք աճին և արտադրությանը թվային համակարգով։</p>
-    </div>
-    <div class="card">
-      <h3>4. Եկամուտ</h3>
-      <p>Ստանում եք եկամուտ բերքահավաքից։</p>
-    </div>
-  </div>
+<section id="tech">
+<h2>Խելացի ջերմոցների տեխնոլոգիաներ</h2>
+<ul class="tech">
+<li>🌬 Օդի ֆիլտրում՝ HEPA և ածխային ֆիլտրերով</li>
+<li>🌱 CO₂-ի վերահսկում՝ արագ աճի համար</li>
+<li>🌡 Ավտոմատ ջերմաստիճան</li>
+<li>💧 Խոնավության սենսորներ</li>
+<li>🧠 Տվյալների վերլուծություն և կանխատեսում</li>
+</ul>
 </section>
 
 <section id="about">
-  <h2>Մեր մասին</h2>
-  <p>
-    AgroSmart-ը նպատակ ունի զարգացնել բարձր տեխնոլոգիական
-    գյուղատնտեսությունը Հայաստանում՝ ստեղծելով վստահելի
-    ներդրումային միջավայր։
-  </p>
-</section>
-
-<section id="news">
-  <h2>Նորություններ</h2>
-  <div class="card">
-    <h3>Նոր խելացի ջերմոց Նաիրիում</h3>
-    <p>2026 թվականին մեկնարկում է նոր նախագիծ՝ ամբողջովին ավտոմատ կառավարմամբ։</p>
-  </div>
+<h2>Մեր մասին</h2>
+<p>
+AgroSmart-ը նպատակ ունի Հայաստանում զարգացնել
+բարձր տեխնոլոգիական ջերմոցային տնտեսություններ՝
+մաքուր օդով, վերահսկվող միջավայրով և կայուն եկամտով։
+</p>
 </section>
 
 <section id="contact">
-  <h2>Կապ մեզ հետ</h2>
-  <p>📧 info@agrosmart.am</p>
-  <p>📞 +374 77 000000</p>
+<h2>Կապ մեզ հետ</h2>
+<p>📧 info@agrosmart.am</p>
+<p>📞 +374 77 123456</p>
 </section>
 
-<footer>
-  © 2026 AgroSmart — Բոլոր իրավունքները պաշտպանված են
-</footer>
+<footer>© 2026 AgroSmart</footer>
+
+<!-- MODALS -->
+<div class="modal" id="login">
+<div class="modal-content">
+<h3>Մուտք</h3>
+<input placeholder="Email">
+<input type="password" placeholder="Գաղտնաբառ">
+<button class="primary">Մուտք</button>
+<p onclick="closeModal()">Փակել</p>
+</div>
+</div>
+
+<div class="modal" id="register">
+<div class="modal-content">
+<h3>Գրանցում</h3>
+<input placeholder="Անուն">
+<input placeholder="Email">
+<input type="password" placeholder="Գաղտնաբառ">
+<button class="primary">Գրանցվել</button>
+<p onclick="closeModal()">Փակել</p>
+</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+function goHome(){ location.href="#home"; }
+function openModal(id){ document.getElementById(id).style.display="block"; }
+function closeModal(){ document.querySelectorAll(".modal").forEach(m=>m.style.display="none"); }
+
+function initMap(id, lat, lng){
+  const map = L.map(id).setView([lat,lng],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  L.marker([lat,lng]).addTo(map);
+}
+
+initMap("map1",40.21,44.53);
+initMap("map2",40.22,44.56);
+initMap("map3",40.33,44.38);
+</script>
 
 </body>
 </html>
